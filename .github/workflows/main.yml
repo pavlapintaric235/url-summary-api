@@ -1,81 +1,89 @@
 name: Continuous Integration and Delivery
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 env:
   IMAGE: ghcr.io/pavlapintaric235/url-summary-api
 
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-  permissions:
-  contents: read
-  packages: write
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: main
-      - name: Log in to GitHub Packages
-        run: echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin ghcr.io
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" |
+          docker login ghcr.io \
+            --username "${{ github.actor }}" \
+            --password-stdin
+
       - name: Pull image
         run: |
-          docker pull ${{ env.IMAGE }}:latest || true
+          docker pull "${{ env.IMAGE }}:latest" || true
+
       - name: Build image
         run: |
           docker build \
-            --cache-from ${{ env.IMAGE }}:latest \
-            --tag ${{ env.IMAGE }}:latest \
+            --cache-from "${{ env.IMAGE }}:latest" \
+            --tag "${{ env.IMAGE }}:latest" \
             --file ./project/Dockerfile.prod \
-            "./project"
+            ./project
+
       - name: Push image
         run: |
-          docker push ${{ env.IMAGE }}:latest
+          docker push "${{ env.IMAGE }}:latest"
 
   test:
     name: Test Docker Image
     runs-on: ubuntu-latest
     needs: build
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          ref: main
-      - name: Log in to GitHub Packages
-        run: echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_ACTOR} --password-stdin ghcr.io
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" |
+          docker login ghcr.io \
+            --username "${{ github.actor }}" \
+            --password-stdin
+
       - name: Pull image
         run: |
-          docker pull ${{ env.IMAGE }}:latest || true
-      - name: Build image
-        run: |
-          docker build \
-            --cache-from ${{ env.IMAGE }}:latest \
-            --tag ${{ env.IMAGE }}:latest \
-            --file ./project/Dockerfile.prod \
-            "./project"
+          docker pull "${{ env.IMAGE }}:latest"
+
       - name: Run container
         run: |
           docker run \
-            -d \
+            --detach \
             --name fastapi-tdd \
-            -e PORT=8765 \
-            -e ENVIRONMENT=dev \
-            -e DATABASE_URL=sqlite://sqlite.db \
-            -e DATABASE_TEST_URL=sqlite://sqlite.db \
-            -p 5003:8765 \
-            ${{ env.IMAGE }}:latest
+            --env PORT=8765 \
+            --env ENVIRONMENT=dev \
+            --env DATABASE_URL=sqlite://sqlite.db \
+            --env DATABASE_TEST_URL=sqlite://sqlite.db \
+            --publish 5003:8765 \
+            "${{ env.IMAGE }}:latest"
+
       - name: Pytest
         run: docker exec fastapi-tdd python -m pytest .
+
       - name: Flake8
         run: docker exec fastapi-tdd python -m flake8 .
+
       - name: Black
         run: docker exec fastapi-tdd python -m black . --check
+
       - name: isort
         run: docker exec fastapi-tdd python -m isort . --check-only

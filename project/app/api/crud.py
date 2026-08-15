@@ -4,11 +4,9 @@ from app.models.pydantic import SummaryPayloadSchema, SummaryUpdatePayloadSchema
 from app.models.tortoise import TextSummary
 
 
+
 async def post(payload: SummaryPayloadSchema) -> int:
-    summary = TextSummary(
-        url=payload.url,
-        summary="dummy summary",
-    )
+    summary = TextSummary(url=payload.url, summary="")
     await summary.save()
     return summary.id
 

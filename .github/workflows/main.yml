@@ -3,17 +3,17 @@ name: Continuous Integration and Delivery
 on: [push]
 
 env:
-  IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[A-Z]' '[a-z]')/summarizer
+  IMAGE: ghcr.io/pavlapintaric235/url-summary-api
 
-permissions:
-  contents: read
-  packages: write
 
 jobs:
 
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
+  permissions:
+  contents: read
+  packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3

@@ -13,7 +13,6 @@ The project was built with test-driven development (TDD). It includes asynchrono
 ## Live API
 
 - [Interactive Swagger UI](https://pure-shelf-80408-af52b72d1688.herokuapp.com/docs)
-- [ReDoc API documentation](https://pure-shelf-80408-af52b72d1688.herokuapp.com/redoc)
 - [Health check](https://pure-shelf-80408-af52b72d1688.herokuapp.com/ping)
 - [GitHub Actions workflow](https://github.com/pavlapintaric235/url-summary-api/actions)
 

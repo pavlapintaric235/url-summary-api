@@ -10,6 +10,8 @@ A containerized REST API that accepts the URL of a web article, extracts its con
 
 The project was built with test-driven development (TDD). It includes asynchronous CRUD operations, request validation, background processing, database migrations, unit and integration tests, Docker-based development and production environments, and an automated GitHub Actions deployment pipeline.
 
+**Demo Video** - https://lnkd.in/p/dJce9vK8
+
 ## Live API
 
 - [Interactive Swagger UI](https://pure-shelf-80408-af52b72d1688.herokuapp.com/docs)
